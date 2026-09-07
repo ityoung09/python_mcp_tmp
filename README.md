@@ -1,6 +1,6 @@
-# MCP 学习与实践项目 (mcp-tmp)
+# MCP TMP - MCP 学习与实践 + AI 服务
 
-本项目基于 **FastMCP** 构建，旨在帮助初学者快速掌握 **MCP (Model Context Protocol)** 协议的核心原理与实际应用。
+本项目基于 **FastMCP** 构建，一方面帮助初学者快速掌握 **MCP (Model Context Protocol)** 协议的核心原理与实际应用，另一方面集成了底层 AI 服务（当前提供商已重构为 **DeepSeek**）。
 
 ---
 
@@ -9,23 +9,73 @@
 ```text
 .
 ├── src/
-│   ├── ai/                          # LLM 模型调用示例 (Azure AI, OpenAI)
-│   │   ├── grok_service.py
-│   │   └── openai_service.py
+│   ├── ai/                          # 底层 AI 服务
+│   │   ├── __init__.py              # 导出 DeepSeekService
+│   │   ├── deepseek_service.py      # DeepSeek AI 服务实现类（支持单轮/流式/多轮对话）
+│   │   ├── grok_service.py          # （旧版参考）Grok 服务
+│   │   └── openai_service.py        # （旧版参考）OpenAI 服务
 │   └── mcp/                         # MCP 服务实现
 │       ├── __init__.py
 │       ├── mcp_tmp.py               # 基础系统信息与星座查询服务 (端口 8000)
 │       ├── learning_mcp.py          # 核心教学服务: 全面演示 Tools、Resources 与 Prompts (端口 8001)
 │       └── test_learning_mcp.py     # 自动化测试与客户端调用脚本
-├── pyproject.toml
+├── .env.example                     # 环境变量示例
+├── main.py                          # 主入口示例
+├── pyproject.toml                   # 项目配置与依赖
 └── README.md
 ```
 
 ---
 
-## MCP 核心三要素 (The Three Primitives)
+## 第一部分：AI 服务 (DeepSeek)
 
-在 [learning_mcp.py](file:///C:/Users/74264/orca/workspaces/python_mcp_tmp/add-mcp-service/src/mcp/learning_mcp.py) 中，完整演示了 MCP 协议的三大支柱：
+### 配置说明
+
+1. 复制 `.env.example` 为 `.env`：
+   ```bash
+   cp .env.example .env
+   ```
+2. 在 `.env` 中填写您的 DeepSeek API Key：
+   ```env
+   DEEPSEEK_API_KEY=sk-your-key-here
+   # 可选配置（若需修改基地址或模型）：
+   # DEEPSEEK_BASE_URL=https://api.deepseek.com
+   # DEEPSEEK_MODEL=deepseek-chat
+   ```
+
+### 使用方法
+
+#### 1. 运行主程序
+```bash
+uv run python main.py
+```
+
+#### 2. 直接运行 DeepSeek 服务测试
+```bash
+uv run python src/ai/deepseek_service.py
+```
+
+#### 3. 代码中调用 DeepSeekService
+```python
+from src.ai import DeepSeekService
+
+# 初始化（自动从 .env 或环境变量读取 DEEPSEEK_API_KEY）
+ai = DeepSeekService()
+
+# 基础对话
+reply = ai.chat("你好！")
+print(reply)
+
+# 流式对话
+for chunk in ai.chat_stream("请写一首小诗"):
+    print(chunk, end="", flush=True)
+```
+
+---
+
+## 第二部分：MCP 核心三要素 (The Three Primitives)
+
+在 `src/mcp/learning_mcp.py` 中，完整演示了 MCP 协议的三大支柱：
 
 ### 1. Tools (工具)
 - **概念**：大模型可以主动发起调用的外部函数（类似于 Function Calling）。模型根据你的输入、参数注解和 Docstring 决定何时调用。
@@ -51,7 +101,7 @@
 
 ---
 
-## 快速上手与运行
+## MCP 快速上手与运行
 
 ### 1. 一键运行自动化测试 (推荐)
 无需配置任何客户端，直接在终端里观察 MCP Client 与 Server 的完整交互：
@@ -80,6 +130,8 @@ uv run python src/mcp/learning_mcp.py --transport sse --port 8001
 
 MCP 标准客户端（如 Claude Desktop、Cursor、Antigravity 等）通常通过标准输入输出 (Stdio) 启动子进程。
 
+> 下方配置中的 `<项目绝对路径>` 请替换为你本机克隆本仓库后的绝对路径，例如 `C:\Users\you\code\python_mcp_tmp`。
+
 #### Claude Desktop 配置示例 (`claude_desktop_config.json`)
 ```json
 {
@@ -89,7 +141,7 @@ MCP 标准客户端（如 Claude Desktop、Cursor、Antigravity 等）通常通�
       "args": [
         "run",
         "--directory",
-        "C:\\Users\\74264\\orca\\workspaces\\python_mcp_tmp\\add-mcp-service",
+        "<项目绝对路径>",
         "python",
         "src/mcp/learning_mcp.py",
         "--transport",
@@ -109,7 +161,7 @@ MCP 标准客户端（如 Claude Desktop、Cursor、Antigravity 等）通常通�
       "args": [
         "run",
         "--directory",
-        "C:\\Users\\74264\\orca\\workspaces\\python_mcp_tmp\\add-mcp-service",
+        "<项目绝对路径>",
         "python",
         "src/mcp/learning_mcp.py",
         "--transport",
