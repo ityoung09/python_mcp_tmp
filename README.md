@@ -130,7 +130,7 @@ uv run python src/mcp/learning_mcp.py --transport sse --port 8001
 
 MCP 标准客户端（如 Claude Desktop、Cursor、Antigravity 等）通常通过标准输入输出 (Stdio) 启动子进程。
 
-> 下方配置中的 `<项目绝对路径>` 请替换为你本机克隆本仓库后的绝对路径，例如 `C:\Users\you\code\python_mcp_tmp`。
+> 下方配置中的 `<项目绝对路径>` 请替换为你本机克隆本仓库后的绝对路径，例如 `D:/code/python_mcp_tmp`（Windows 下用正斜杠，或把反斜杠双写成 `\`）。
 
 #### Claude Desktop 配置示例 (`claude_desktop_config.json`)
 ```json
